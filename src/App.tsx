@@ -7,11 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import KeyboardButton from '@features/buttons/components/KeyboardButton';
 import useWordToGuess from '@features/dictionary/hooks/useWordToGuess';
 import AllKnownEnglishWords5Letters from '@features/dictionary/data/AllKnownEnglishWords-5Letters';
 import { storage } from '@features/mmkv/storage';
 import useHideSplashScreen from '@features/splashScreen/hooks/useHideSplashScreen';
+import Keyboard from '@features/keyboard/components/Keyboard';
+import OverallScore from '@features/score/components/OverallScore';
+import CurrentGameScore from '@features/score/components/CurrentGameScore';
 
 const App = () => {
   useHideSplashScreen();
@@ -24,10 +26,6 @@ const App = () => {
   const [success, setSuccess] = useState(false);
   const [failed, setFailed] = useState(false);
   const [isInvalidWord, setIsInvalidWord] = useState(false);
-
-  const firstRowLetters = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
-  const secondRowLetters = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'];
-  const thirdRowLetters = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
 
   const onPressKey = (key: string) => {
     if (currentWordLetters.length === 5 || success || failed) {
@@ -86,20 +84,6 @@ const App = () => {
     return wordToGuess[index] === letter;
   }
 
-  const isKeyAbsent = (letter: string) => {
-    return guesses.some(guess => guess.indexOf(letter) >= 0) &&
-      !wordToGuess.includes(letter.toUpperCase());
-  }
-
-  const isKeyCorrect = (letter: string) => {
-    return guesses.some(guess => guess.findIndex((guessLetter, idx) => guessLetter === letter && wordToGuess[idx] === letter) >= 0) &&
-      wordToGuess.includes(letter.toUpperCase());
-  }
-
-  const isUnused = (letter: string) => {
-    return guesses.every(guess => guess.indexOf(letter) < 0);
-  }
-
   const onReset = () => {
     if (!failed && !success) {
       const skips = storage.getNumber('skips');
@@ -123,11 +107,7 @@ const App = () => {
       />
       <View style={styles.headerSection}>
         <Text style={styles.headerText}>WORD MOUNTAIN</Text>
-        <View style={styles.statsRow}>
-          <Text style={styles.statsText}>Wins: {storage.getNumber('wins') ?? 0},{' '}</Text>
-          <Text style={styles.statsText}>Loses: {storage.getNumber('loses') ?? 0},{' '}</Text>
-          <Text style={styles.statsText}>Skips: {storage.getNumber('skips') ?? 0}</Text>
-        </View>
+        <OverallScore />
         <TouchableOpacity
           onPress={onReset}
           activeOpacity={0.7}
@@ -191,56 +171,20 @@ const App = () => {
       </View>
 
       <View style={styles.keyboardSection}>
-        {/* status */}
-        <View style={styles.statusContainer}>
-          {isInvalidWord && (<Text style={styles.invalidText}>Invalid word</Text>)}
-          {failed && (<Text style={styles.invalidText}>Incorrect! The word was: {wordToGuess}</Text>)}
-          {success && (<Text style={styles.successText}>Success!</Text>)}
-        </View>
+        <CurrentGameScore
+          wordToGuess={wordToGuess}
+          isInvalidWord={isInvalidWord}
+          success={success}
+          failed={failed}
+          />
 
-        {/* keyboard */}
-          <View style={styles.keyboardRow}>
-            {firstRowLetters.map(key => (
-              <KeyboardButton
-                key={key}
-                label={key}
-                onPress={() => onPressKey(key)}
-                status={isUnused(key) ? 'unused' : isKeyAbsent(key) ? 'absent' : isKeyCorrect(key) ? 'correct' : 'misplaced'}
-              />
-            ))}
-          </View>
-          <View style={styles.keyboardRow}>
-            {secondRowLetters.map(key => (
-              <KeyboardButton
-                key={key}
-                label={key}
-                onPress={() => onPressKey(key)}
-                status={isKeyAbsent(key) ? 'absent' : isKeyCorrect(key) ? 'correct' : isUnused(key) ? 'unused' : 'misplaced'}
-              />
-            ))}
-          </View>
-          <View style={styles.keyboardRow}>
-            <KeyboardButton
-              label='ENTER'
-              onPress={onEnter}
-              isFunctionalKey={true}
-              status='unused'
-              />
-            {thirdRowLetters.map(key => (
-              <KeyboardButton
-                key={key}
-                label={key}
-                onPress={() => onPressKey(key)}
-                status={isKeyAbsent(key) ? 'absent' : isKeyCorrect(key) ? 'correct' : isUnused(key) ? 'unused' : 'misplaced'}
-              />
-            ))}
-            <KeyboardButton
-              label='BACK'
-              onPress={onBackspace}
-              isFunctionalKey={true}
-              status='unused'
-              />
-          </View>
+        <Keyboard
+          guesses={guesses}
+          wordToGuess={wordToGuess}
+          onPressKey={onPressKey}
+          onBackspace={onBackspace}
+          onEnter={onEnter}
+          />
       </View>
     </SafeAreaView>
   );
@@ -284,15 +228,6 @@ const createStyles = (isDarkMode: boolean) =>
       fontSize: 20,
       fontWeight: '700',
       color: '#ededed',
-    },
-    keyboardContainer: {
-    },
-    keyboardRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: 5,
-      marginTop: 10,
-      marginHorizontal: 20,
     },
     currentWordRow: {
       flexDirection: 'row',
@@ -342,28 +277,6 @@ const createStyles = (isDarkMode: boolean) =>
       height: 60,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    statusContainer: {
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      height: 60,
-    },
-    invalidText: {
-      color: '#d93f44',
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    successText: {
-      color: '#33ba18',
-      fontSize: 24,
-      fontWeight: '700',
-    },
-    statsRow: {
-      flexDirection: 'row',
-      paddingVertical: 5,
-    },
-    statsText: {
-      color: isDarkMode ? '#a8a8a8' : '#242423',
     },
   });
 
