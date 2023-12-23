@@ -14,6 +14,9 @@ import useHideSplashScreen from '@features/splashScreen/hooks/useHideSplashScree
 import Keyboard from '@features/keyboard/components/Keyboard';
 import OverallScore from '@features/score/components/OverallScore';
 import CurrentGameScore from '@features/score/components/CurrentGameScore';
+import PreviousGuesses from '@features/guess/components/PreviousGuesses';
+import CurrentGuess from '@features/guess/components/CurrentGuess';
+import FutureGuesses from '@features/guess/components/FutureGuesses';
 
 const App = () => {
   useHideSplashScreen();
@@ -76,14 +79,6 @@ const App = () => {
 
   const remainingGuesses = [...Array(5 - guessCount).keys()];
 
-  const isAbsent = (letter: string) => {
-    return !wordToGuess.includes(letter.toUpperCase());
-  }
-
-  const isCorrect = (letter: string, index: number) => {
-    return wordToGuess[index] === letter;
-  }
-
   const onReset = () => {
     if (!failed && !success) {
       const skips = storage.getNumber('skips');
@@ -118,56 +113,15 @@ const App = () => {
       </View>
 
       <View style={styles.guessSection}>
-        {/* previous guesses */}
-        {guesses.map((guess: string[], guessIndex: number) => (
-          <View key={`guessIndex-${guessIndex}`} style={styles.currentWordRow}>
-            {guess.map((letter: string, index: number) => (
-              <View key={`guessIndex-${guessIndex}-letterIndex-${index}`} style={isAbsent(letter) ? styles.absentBtn : isCorrect(letter, index) ? styles.correctBtn : styles.misplacedBtn}>
-                <Text style={isAbsent(letter) ? styles.absentText : isCorrect(letter, index) ? styles.correctText : styles.misplacedText}>{letter}</Text>
-              </View>
-            ))}
-          </View>
-        ))}
+        <PreviousGuesses guesses={guesses} wordToGuess={wordToGuess} />
 
-        {/* current guess */}
-        <View style={styles.currentWordRow}>
-          <View style={success ? styles.correctBtn : styles.letterContainer}>
-            <Text style={styles.letter}>{currentWordLetters?.[0] ?? ''}</Text>
-          </View>
-          <View style={success ? styles.correctBtn : styles.letterContainer}>
-            <Text style={styles.letter}>{currentWordLetters?.[1] ?? ''}</Text>
-          </View>
-          <View style={success ? styles.correctBtn : styles.letterContainer}>
-            <Text style={styles.letter}>{currentWordLetters?.[2] ?? ''}</Text>
-          </View>
-          <View style={success ? styles.correctBtn : styles.letterContainer}>
-            <Text style={styles.letter}>{currentWordLetters?.[3] ?? ''}</Text>
-          </View>
-          <View style={success ? styles.correctBtn : styles.letterContainer}>
-            <Text style={styles.letter}>{currentWordLetters?.[4] ?? ''}</Text>
-          </View>
-        </View>
+        <CurrentGuess
+          success={success}
+          failed={failed}
+          currentWordLetters={currentWordLetters}
+          />
 
-        {/* future guesses */}
-        {remainingGuesses.map((index: number) => (
-          <View style={styles.currentWordRow} key={`remainingGuesses-${index}`}>
-            <View style={styles.letterContainer}>
-              <Text style={styles.letter}></Text>
-            </View>
-            <View style={styles.letterContainer}>
-              <Text style={styles.letter}></Text>
-            </View>
-            <View style={styles.letterContainer}>
-              <Text style={styles.letter}></Text>
-            </View>
-            <View style={styles.letterContainer}>
-              <Text style={styles.letter}></Text>
-            </View>
-            <View style={styles.letterContainer}>
-              <Text style={styles.letter}></Text>
-            </View>
-          </View>
-        ))}
+        <FutureGuesses remainingGuesses={remainingGuesses} />
       </View>
 
       <View style={styles.keyboardSection}>
@@ -228,55 +182,6 @@ const createStyles = (isDarkMode: boolean) =>
       fontSize: 20,
       fontWeight: '700',
       color: '#ededed',
-    },
-    currentWordRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: 20,
-      marginTop: 5,
-    },
-    letterContainer: {
-      backgroundColor: isDarkMode ? '#ededed' : '#242423',
-      width: 40,
-      height: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    letter: {
-      fontSize: 20,
-    },
-    absentText: {
-      color: isDarkMode ? '#fff' : '#b8b8b8',
-      fontSize: 20,
-    },
-    misplacedText: {
-      color: '#424242',
-      fontSize: 20,
-    },
-    correctText: {
-      color: '#424242',
-      fontSize: 20,
-    },
-    absentBtn: {
-      backgroundColor: isDarkMode ? '#b8b8b8' : '#424242',
-      width: 40,
-      height: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    misplacedBtn: {
-      backgroundColor: '#ffa200',
-      width: 40,
-      height: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    correctBtn: {
-      backgroundColor: '#33ba18',
-      width: 40,
-      height: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
     },
   });
 
