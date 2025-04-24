@@ -1,4 +1,61 @@
 {
-  "name": "WordMountainMobile",
-  "displayName": "Word Mountain"
+  "expo": {
+    "owner": "signalonedigital",
+    "name": "Word Mountain",
+    "slug": "word-mountain",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./src/core/assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./src/core/assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0097b2"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.signalone.wordmountain",
+      "buildNumber": "1",
+      "usesAppleSignIn": true,
+      "entitlements": {
+        "aps-environment": "production"
+      },
+      "appleTeamId": "SLT8SJ897V",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/core/assets/images/adaptive-icon.png",
+        "backgroundColor": "#0097b2"
+      },
+      "package": "com.signalone.wordmountain",
+      "versionCode": 1,
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./src/core/assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0097b2"
+        }
+      ],
+      "expo-build-properties"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1415aa15-4028-4010-beee-99503e498a33"
+      }
+    }
+  }
 }
